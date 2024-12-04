@@ -14,17 +14,9 @@ services:
       - ./message.sql:/docker-entrypoint-initdb.d/message.sql  
     networks:
       - twotier
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
-
+  
   flask-app:
-    build:
-      context: .
-    container_name: flask-app
+    image: zarkhan625/flaskapp:latest
     ports:
       - "5000:5000"
     environment:
@@ -37,12 +29,6 @@ services:
     networks:
       - twotier
     restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
 networks:
   twotier:
