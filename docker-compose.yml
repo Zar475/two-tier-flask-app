@@ -5,31 +5,31 @@ services:
     image: mysql:5.7
     container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root  # Change this to a stronger password in production
       MYSQL_DATABASE: devops
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
     volumes:
-      - mysql-data:/var/lib/mysql  # Using a named volume instead of bind mount
+      - mysql-data:/var/lib/mysql  # Using a named volume for persistent data
       - ./message.sql:/docker-entrypoint-initdb.d/message.sql  # Ensure this file exists
     networks:
       - twotier
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD", "mysql", "-uroot", "-proot", "-e", "SHOW DATABASES;"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 60s  # Increase start period to ensure MySQL is fully initialized
     restart: always
 
   flask-app:
     build:
-      context: .
+      context: .  # Ensure your Flask app Dockerfile is in the current directory
     container_name: flask-app
     ports:
       - "5000:5000"  # Ensure Flask app listens on port 5000 inside the container
     environment:
-      MYSQL_HOST: mysql
+      MYSQL_HOST: mysql  # Hostname of the MySQL service (container name)
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
       MYSQL_DB: devops
@@ -43,10 +43,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 60s  # Increase start period to give Flask app more time to start
+    restart: always
 
 networks:
   twotier:
+    driver: bridge
 
 volumes:
   mysql-data:  # Define the named volume for MySQL data
