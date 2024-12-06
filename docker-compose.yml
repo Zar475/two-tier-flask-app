@@ -1,4 +1,4 @@
-version: "3.8"
+#version: "3.8"
 
 services:
   mysql:
@@ -20,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s  # Increase start period to ensure MySQL is fully initialized
-    restart: always
+    restart: always  # This restart policy is defined only once for MySQL
 
   flask-app:
     build:
@@ -37,14 +37,13 @@ services:
       - mysql
     networks:
       - twotier
-    restart: always
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 60s  # Increase start period to give Flask app more time to start
-    restart: always
+    restart: always  # Restart policy defined only once for Flask app
 
 networks:
   twotier:
@@ -52,4 +51,3 @@ networks:
 
 volumes:
   mysql-data:  # Define the named volume for MySQL data
-
